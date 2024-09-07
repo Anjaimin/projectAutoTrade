@@ -9,6 +9,7 @@ from pykiwoom.kiwoom import Kiwoom
 from pykrx import stock
 import datetime
 import mysql.connector
+import configparser
 
 form_class = uic.loadUiType(r'gui.ui')[0]
 
@@ -44,7 +45,14 @@ class MyWindow(QMainWindow, form_class):
         self.send_slack_message("프로그램이 실행되었으며, 키움 API에 접속 성공했습니다.")
 
     def send_slack_message(self, message):
-        webhook_url = "https://hooks.slack.com/services/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"
+        config = configparser.ConfigParser()
+        config.read('config.ini')  # 설정 파일 읽기
+
+        webhook_url = config.get('slack', 'webhook_url')
+        if not webhook_url:
+            print("Error: Slack webhook URL is not set.")
+            return
+
         headers = {'Content-type': 'application/json'}
         payload = {"text": message}
         requests.post(webhook_url, json=payload, headers=headers)
